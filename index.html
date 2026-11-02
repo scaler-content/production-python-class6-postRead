@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Class 6 Post-Read</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky chapter bar, then one long reading column with interactive "desk" widgets.
+   Palette: carrier-label world. Navy ink, signal blue, tape yellow, plus green/red for pass/fail. Single light look. */
+:root{
+  --bg:#F5F7FB; --surface:#FFFFFF; --ink:#16233B; --muted:#56627C; --line:#D9DFEB;
+  --blue:#2A63D8; --blue-soft:#E6EDFC; --tape:#F5C531; --tape-soft:#FFF3C9;
+  --ok:#17825A; --ok-soft:#E2F4EA; --bad:#C23B3B; --bad-soft:#FCE8E8;
+  --code-bg:#EEF2F9; --kw:#2A63D8; --str:#17825A; --cmt:#74809A; --num:#B24F12;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:960px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.7rem,4vw,2.3rem);font-weight:800;letter-spacing:-.02em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0 0 .9em;max-width:68ch}
+a{color:var(--blue)}
+code,.mono{font-family:var(--mono);font-size:.9em}
+:not(pre)>code{background:var(--code-bg);padding:.1em .35em;border-radius:4px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button{font:inherit;cursor:pointer}
+
+/* chapter bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));
+  padding:0 max(16px,env(safe-area-inset-left,0px));background:rgba(245,247,251,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:960px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:thin}
+.bar a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:.85rem;font-weight:500;padding:5px 11px;border-radius:99px;border:1px solid transparent}
+.bar a:hover{color:var(--ink);background:var(--blue-soft)}
+.bar a.on{background:var(--ink);color:#fff}
+.prog{height:3px;background:var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+.prog i{display:block;height:100%;width:0;background:var(--tape)}
+
+/* hero */
+.hero{padding:56px 0 40px;display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:clamp(2.3rem,6.4vw,4rem);font-weight:800;letter-spacing:-.03em}
+.hero h1 mark{background:linear-gradient(transparent 58%,var(--tape) 58%);color:inherit;padding:0 .08em}
+.lede{font-size:1.15rem;color:var(--muted);margin:18px 0 22px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font-size:.82rem;padding:4px 11px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.label-card{background:var(--surface);border:2px solid var(--ink);border-radius:6px;padding:0;box-shadow:6px 6px 0 var(--tape);transform:rotate(1.2deg);max-width:340px;justify-self:center;width:100%}
+.label-card .top{background:var(--ink);color:#fff;padding:8px 14px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;letter-spacing:.06em}
+.label-card .mid{padding:14px;font-family:var(--mono);font-size:.88rem;display:grid;gap:4px}
+.label-card .mid b{font-family:var(--display);font-size:1.7rem;letter-spacing:-.01em}
+.label-card .late{margin:0 14px 14px;padding:8px 10px;background:var(--bad-soft);color:var(--bad);font-weight:600;border:1px dashed var(--bad);border-radius:4px;font-family:var(--mono);font-size:.85rem}
+.bars{height:26px;margin:0 14px 14px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px)}
+
+section{padding:48px 0 8px;scroll-margin-top:64px}
+.kicker{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.intro{color:var(--muted);margin:12px 0 26px;max-width:62ch}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.row{display:grid;gap:18px}
+.two{grid-template-columns:1fr 1fr}
+.three{grid-template-columns:repeat(3,1fr)}
+.two>*,.three>*{min-width:0}
+
+/* playground */
+.desk{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+.desk>*{min-width:0}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:600}
+.btn:hover{background:#243759}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--blue-soft)}
+.sw{display:flex;gap:8px;align-items:center;font-size:.92rem;color:var(--muted)}
+.sw input{width:18px;height:18px;accent-color:var(--blue)}
+.cases{display:grid;gap:8px}
+.cc{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-left:6px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface);transition:background .25s,border-color .25s}
+.cc .id{font-family:var(--mono);font-weight:500;font-size:.88rem}
+.cc .st{font-size:.82rem;color:var(--muted);line-height:1.35}
+.cc .st b{color:var(--ink);font-weight:600}
+.tag{font-family:var(--mono);font-size:.72rem;padding:3px 8px;border-radius:99px;background:var(--code-bg);color:var(--muted);white-space:nowrap}
+.cc.flag{border-left-color:var(--bad);background:var(--bad-soft)}
+.cc.flag .tag{background:var(--bad);color:#fff}
+.cc.closed{border-left-color:var(--ok)}
+.cc.closed .tag{background:var(--ok-soft);color:var(--ok)}
+.cc.ontime{border-left-color:var(--blue)}
+.cc.ontime .tag{background:var(--blue-soft);color:var(--blue)}
+.tally{margin-top:12px;font-weight:600}
+
+/* code */
+.code{min-width:0;max-width:100%;position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;margin:0}
+.code pre{margin:0;padding:16px 16px 16px;overflow-x:auto;font-family:var(--mono);font-size:.84rem;line-height:1.65;tab-size:4}
+.code .cp{position:absolute;top:8px;right:8px;font-size:.74rem;padding:3px 9px;border-radius:6px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.code .cp:hover{color:var(--ink);background:var(--blue-soft)}
+.k{color:var(--kw);font-weight:500}.s{color:var(--str)}.c{color:var(--cmt);font-style:italic}.n{color:var(--num)}
+.hl{background:var(--tape-soft);outline:1px solid var(--tape);border-radius:3px}
+
+/* path */
+.path{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s}
+.path li{position:relative;padding:0 0 22px 54px;counter-increment:s}
+.path li::before{content:counter(s);position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:700}
+.path li::after{content:"";position:absolute;left:17px;top:38px;bottom:2px;width:2px;background:var(--line)}
+.path li:last-child::after{display:none}
+.path li:last-child{padding-bottom:0}
+.path b{font-family:var(--display);font-size:1.1rem}
+.path span{display:block;color:var(--muted);font-size:.93rem}
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:6px 0 4px}
+.flow .node{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.9rem}
+.flow .node b{display:block;font-family:var(--display);font-size:1rem;margin-bottom:2px}
+.flow .node.hot{border-color:var(--ink);box-shadow:4px 4px 0 var(--tape)}
+.flow .arr{align-self:center;color:var(--muted);font-family:var(--mono)}
+
+/* concept explorer */
+.explore{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start}
+.explore>*{min-width:0}
+.tabs{display:grid;gap:6px}
+.tab{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-weight:500;color:var(--ink)}
+.tab small{display:block;color:var(--muted);font-weight:400;font-size:.78rem}
+.tab:hover{background:var(--blue-soft)}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab[aria-selected="true"] small{color:#C9D3E8}
+.cp-panel h3{font-size:1.5rem;margin-bottom:8px}
+.say{border-left:4px solid var(--tape);background:var(--tape-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0}
+.say b{font-size:.76rem;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:block;color:#7A5B00}
+.rem{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.rem li{padding-left:26px;position:relative}
+.rem li::before{content:"";position:absolute;left:4px;top:.55em;width:10px;height:10px;border-radius:2px;background:var(--blue)}
+
+/* traceback */
+.tb{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;gap:4px}
+.tbl{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;padding:7px 8px;color:var(--ink);width:100%}
+.tbl:hover{background:var(--surface)}
+.tbl[aria-pressed="true"]{background:var(--surface);border-color:var(--ink);box-shadow:3px 3px 0 var(--tape)}
+.tbl .bd{width:26px;height:26px;border-radius:50%;background:var(--line);color:var(--muted);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.85rem}
+.tbl[aria-pressed="true"] .bd{background:var(--ink);color:#fff}
+.tbl code{white-space:pre-wrap;word-break:break-word;background:none;padding:0;font-size:.82rem}
+.tbn{min-height:92px;margin-top:12px}
+
+/* tables */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.92rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--ink);color:#fff;font-weight:600;font-size:.82rem;letter-spacing:.03em}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+
+/* grounding demo */
+.note-box{background:var(--tape-soft);border:1px dashed #C9A200;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:.9rem}
+.note-box mark{background:var(--tape);padding:0 2px;border-radius:2px}
+input[type=text],textarea{width:100%;font:inherit;font-family:var(--mono);font-size:.9rem;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface);color:var(--ink)}
+textarea{font-family:var(--body);min-height:96px;resize:vertical}
+.verdict{display:inline-block;font-family:var(--mono);font-weight:500;padding:5px 12px;border-radius:6px;margin-top:10px}
+.verdict.t{background:var(--ok-soft);color:var(--ok)}.verdict.f{background:var(--bad-soft);color:var(--bad)}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+.rules>div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:.9rem;min-width:0}
+.rules b{display:block;font-family:var(--display);margin-bottom:4px}
+.split{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--surface)}
+.split>div{padding:16px 18px;min-width:0}
+.split>div+div{border-left:2px dashed var(--ink);background:var(--tape-soft)}
+.split b{font-family:var(--display);font-size:1.15rem;display:block;margin-bottom:4px}
+
+/* quiz */
+.q{margin-bottom:16px}
+.q .qh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.q .qt{font-weight:600;margin-bottom:10px}
+.opts{display:grid;gap:8px;margin:12px 0}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;background:var(--surface)}
+.opt:hover{background:var(--blue-soft)}
+.opt input{margin-top:.3em;width:17px;height:17px;accent-color:var(--blue);flex:none}
+.opt span{min-width:0;overflow-wrap:anywhere}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:.93rem}
+.fb.good{background:var(--ok-soft);color:#0E5C3D}.fb.bad{background:var(--bad-soft);color:#8A2626}
+.score{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;border-radius:99px;padding:8px 18px;font-weight:600;width:max-content;max-width:100%;margin:10px auto 0;font-size:.92rem}
+
+/* practice */
+.task{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:10px;overflow:hidden}
+.task summary{cursor:pointer;padding:12px 16px;display:flex;gap:12px;align-items:baseline;font-weight:500;list-style:none}
+.task summary::-webkit-details-marker{display:none}
+.task summary .tool{margin-left:auto;font-family:var(--mono);font-size:.74rem;color:var(--muted);white-space:nowrap}
+.task summary .no{font-family:var(--display);font-weight:800;color:var(--blue)}
+.task[open] summary{background:var(--blue-soft)}
+.task .ans{padding:14px 16px;border-top:1px solid var(--line)}
+.task .ans .code{margin-bottom:10px}
+
+footer{margin-top:56px;padding:26px;background:var(--ink);color:#fff;border-radius:14px;display:grid;gap:8px}
+footer h2{color:#fff}
+footer p{color:#C9D3E8;margin:0}
+
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr;padding-top:36px}
+  .label-card{justify-self:start;transform:none}
+  .desk,.two,.explore{grid-template-columns:1fr}
+  .three{grid-template-columns:1fr}
+  .rules{grid-template-columns:1fr 1fr}
+  .tabs{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+}
+@media (max-width:520px){
+  .rules{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}
+  .split>div+div{border-left:0;border-top:2px dashed var(--ink)}
+  .cc{grid-template-columns:54px 1fr}
+  .cc .tag{grid-column:1 / -1;justify-self:start}
+  .task summary{flex-wrap:wrap}.task summary .tool{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* ===== Class 2 additions ===== */
+.muted{color:var(--muted)}.small{font-size:.9rem}
+.label-card .late.good{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.lab{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.fld{display:grid;gap:4px;font-size:.92rem;font-weight:600}
+input[type=date]{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);max-width:100%}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-family:var(--mono);font-size:.85rem;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.chip:hover{background:var(--blue-soft)}
+.chip[aria-pressed="true"],.chip.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+.code pre.out{min-height:130px;white-space:pre-wrap;word-break:break-word}
+.code pre .g{color:var(--ok);font-weight:500}.code pre .d{color:var(--cmt)}.code pre .e{color:var(--bad)}
+.stack{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-content:start;min-width:0}
+.callout{border-left:4px solid var(--blue);background:var(--blue-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0}
+.callout b{font-size:.76rem;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;display:block;color:var(--blue)}
+.callout.warn{border-left-color:var(--tape);background:var(--tape-soft)}.callout.warn b{color:#7A5B00}
+
+/* repo viewer */
+.flist{display:grid;gap:4px;max-height:480px;overflow:auto;padding-right:4px}
+.flist .grp{font-family:var(--mono);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:10px 4px 2px}
+.flist button{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:var(--mono);font-size:.84rem;color:var(--ink);overflow-wrap:anywhere}
+.flist button:hover{background:var(--blue-soft)}
+.flist button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fname{font-family:var(--mono);font-weight:500;font-size:1.05rem;margin:0 0 4px;overflow-wrap:anywhere}
+.fnote{color:var(--muted);font-size:.93rem;margin:0 0 10px}
+.code.tall pre{max-height:440px;overflow:auto}
+
+/* layers */
+.layers{display:grid;gap:8px;margin:10px 0 0}
+.layers div{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--surface)}
+.layers b{font-family:var(--display);display:block}
+.layers .l1{border-color:var(--ok);background:var(--ok-soft)}.layers .l2{border-color:var(--tape);background:var(--tape-soft)}.layers .l3{border-color:var(--blue);background:var(--blue-soft)}
+
+/* order game */
+.order .ans{min-height:48px;border:1px dashed var(--line);border-radius:10px;padding:8px;background:var(--surface);margin:10px 0}
+.order .ans div{font-family:var(--mono);font-size:.84rem;padding:4px 8px;margin:3px 0;border-radius:6px;background:var(--ok-soft);border:1px solid var(--ok);overflow-wrap:anywhere}
+.order .chiprow{flex-direction:column;align-items:stretch}
+.order .chip{text-align:left;border-radius:8px;overflow-wrap:anywhere}
+.hint{min-height:24px;font-size:.93rem;margin:6px 0}.hint.good{color:var(--ok)}.hint.bad{color:var(--bad)}
+
+/* sorter */
+.sorter{margin:12px 0 26px}
+.sorter .pool{display:flex;gap:8px;flex-wrap:wrap;min-height:46px;padding:10px;border:1px dashed var(--line);border-radius:10px;background:var(--surface)}
+.sorter .pool .empty{color:var(--ok);font-weight:600}
+.sorter .bins{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.sorter .bins.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:680px){.sorter .bins{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.sorter .bins,.sorter .bins.two{grid-template-columns:1fr}}
+.sorter .bin{text-align:left;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);color:var(--ink);min-height:84px}
+.sorter .bin:hover{border-color:var(--blue)}
+.sorter .bin b{display:block;font-family:var(--display);font-size:1.02rem}
+.sorter .bin .why{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px}
+.sorter .bin .placed{display:flex;flex-wrap:wrap;gap:4px}
+.sorter .bin .placed span{font-family:var(--mono);font-size:.76rem;background:var(--ok-soft);border:1px solid var(--ok);color:var(--ok);border-radius:6px;padding:0 6px}
+.sorter .bin.flash{border-color:var(--bad);background:var(--bad-soft)}
+
+/* terminals */
+.tasks{list-style:none;padding:0;margin:10px 0;display:grid;gap:6px}
+.tasks li{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.tasks li .ck{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;flex:none}
+.tasks li .tx{min-width:0;overflow-wrap:anywhere}
+.tasks li code,.chk li code{white-space:normal;overflow-wrap:anywhere}
+.tasks li.done{background:var(--ok-soft);border-color:var(--ok)}
+.tasks li.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.term{background:#16233B;color:#EAF0FB;border-radius:12px;overflow:hidden;margin:14px 0;border:1px solid #2A3A5C;font-family:var(--mono);font-size:.88rem}
+.term .bar2{background:#1F3150;padding:6px 12px;font-size:.75rem;color:#AEBBD6;display:flex;gap:6px;align-items:center}
+.term .dot{width:10px;height:10px;border-radius:50%;background:#ff6b6b}.term .dot:nth-child(2){background:#ffd166}.term .dot:nth-child(3){background:#6fe3a1}
+.term .screen{padding:12px 14px;height:280px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;scrollbar-width:thin}
+.term .line{margin:0}
+.term .p{color:#6fe3a1}.term .err{color:#ff8f86}.term .dim{color:#9FB0CE}.term .dir{color:#F5C531;font-weight:600}.term .warnline{color:#F5C531}
+.term .inputrow{display:flex;flex-wrap:wrap;gap:8px;padding:8px 14px 12px;border-top:1px solid #2A3A5C;align-items:center}
+.term .inputrow .pr{color:#6fe3a1;word-break:break-all}
+.term input{flex:1 1 140px;background:transparent;border:none;outline:none;color:#fff;font:inherit;min-width:0;width:auto}
+.term:focus-within{border-color:var(--tape);box-shadow:0 0 0 2px rgba(245,197,49,.35)}
+.fstree{font-family:var(--mono);font-size:.84rem;line-height:1.7;max-height:220px;overflow:auto}
+
+/* troubleshooting */
+.filter{width:100%;font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);margin:0 0 12px}
+.task .ans p{margin:0;max-width:none}
+.chk{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.chk li{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer}
+.chk li .ck{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;flex:none;margin-top:2px}
+.chk li .tx{min-width:0;overflow-wrap:anywhere}
+.chk li.done{background:var(--ok-soft);border-color:var(--ok)}
+.chk li.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.sel2{border-color:var(--blue)}
+.fileviewer{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start}
+.fileviewer>*{min-width:0}
+@media (max-width:820px){.fileviewer{grid-template-columns:1fr}.flist{max-height:210px}}
+</style>
+</head>
+<body>
+
+<div class="bar" id="bar"><div class="bar-in" id="chips">
+  <a href="#try">Replay</a><a href="#built">Big picture</a><a href="#repo">Files</a><a href="#notebook">Concepts</a><a href="#setup">Order</a><a href="#games">Sort</a><a href="#practice">Practice</a><a href="#errors">Troubleshoot</a><a href="#quiz">Quiz</a><a href="#cheat">Cheat sheet</a><a href="#reflect">Check</a>
+</div></div>
+<div class="prog"><i id="progfill"></i></div>
+
+<main class="wrap">
+
+<header class="hero" id="top">
+  <div>
+    <div class="eyebrow">FDE Module 2 · Class 6 · Post-Read</div>
+    <h1>Reusable <mark>building blocks</mark></h1>
+    <p class="lede">In class you turned lines copied in many places into small shared pieces: file helpers, decorators, a context manager that cleans up, and one gateway for every model call. You moved the code onto them one behaviour at a time, and proved with the same tests, the same evaluation and the same file fingerprints that nothing else changed. This page lets you replay it, practise it, and check what stuck. Nothing here is graded.</p>
+    <div class="meta"><span class="pill">About 60 minutes</span><span class="pill">Decorators, context managers, gateway, refactor</span><span class="pill">Meridian Case Intake Workbench</span></div>
+  </div>
+  <div class="label-card" aria-hidden="true">
+    <div class="top"><span>MERIDIAN</span><span>BATCH · B-866DBBE0CA3E</span></div>
+    <div class="mid"><span>ONE DOOR TO THE MODEL</span><b>timed, retried, traced</b><span>NOTHING ELSE CHANGED</span><span>same fingerprints, same evaluation</span></div>
+    <div class="late good">114 CHECKS PASS · MYPY CLEAN</div>
+    <div class="late good">SAME AS BEFORE: 3 OF 3 FINGERPRINTS</div>
+    <div class="bars"></div>
+  </div>
+</header>
+
+<!-- ================= REPLAY ================= -->
+<section id="try">
+  <div class="kicker">Replay</div>
+  <h2>What does the gateway do with it?</h2>
+  <p class="intro">Pick a situation. The desk shows what happens, and what the class saw. Nothing is run for real; the readout describes what happened in class with a fake model.</p>
+  <div class="desk">
+    <div class="panel">
+      <div class="lab" style="margin-top:0">Six situations</div>
+      <div class="chiprow" id="pgMistakes" style="flex-direction:column;align-items:stretch">
+        <button class="chip" data-k="flaky" aria-pressed="true">A model that times out twice</button>
+        <button class="chip" data-k="nokey" aria-pressed="true">No API key is set</button>
+        <button class="chip" data-k="ratelimit" aria-pressed="false">A 429 on every attempt</button>
+        <button class="chip" data-k="notjson" aria-pressed="false">A reply that is not JSON</button>
+        <button class="chip" data-k="badquote" aria-pressed="false">A quote that is not in the note</button>
+        <button class="chip" data-k="halfwrite" aria-pressed="false">A write that fails halfway</button>
+      </div>
+      <div class="tally" id="pgTally" style="font-size:.92rem;font-weight:500;color:var(--muted)"></div>
+    </div>
+    <div class="stack">
+      <div class="lab" style="margin-top:0">What happens</div>
+      <div class="code"><pre id="pgCode"></pre></div>
+      <div class="lab" style="margin-top:4px">What the class saw</div>
+      <div class="code"><pre class="out" id="pgOut" aria-live="polite"></pre></div>
+    </div>
+  </div>
+  <div class="say"><b>What to notice</b>The gateway retries only what waiting can fix. Everything else is raised after one attempt, and every call is recorded, even a failed one, with numbers and names but never note text.</div>
+</section>
+
+<!-- ================= BUILT ================= -->
+<section id="built">
+  <div class="kicker">The big picture</div>
+  <h2>What you built today</h2>
+  <p class="intro">You started class with a program that could prove its results. You finished with one that is also easy to change: the repeated jobs are written once, the model has one door, and every step of the clean-up was shown to be harmless.</p>
+  <div class="flow">
+    <div class="node"><b>Proves what it did</b>Contracts, logs, run report, evaluation (Class 5)</div><span class="arr">→</span>
+    <div class="node hot"><b>Easy to change</b>File helpers, decorators, a context manager, one model gateway</div><span class="arr">→</span>
+    <div class="node"><b>Shown to be unchanged</b>Same tests, same evaluation, same fingerprints</div>
+  </div>
+
+  <div class="scroll" style="margin-top:22px"><table>
+    <tr><th>Question</th><th>Before (Class 5)</th><th>After (Class 6)</th></tr>
+    <tr><td>How is a JSON or CSV file read?</td><td>Separate <code>open</code> and parse lines in six places</td><td><code>read_json</code> and <code>read_csv_dicts</code> in <code>fileio.py</code></td></tr>
+    <tr><td>What if a write fails halfway?</td><td>The old file is safe, but a <code>.tmp</code> file stays behind</td><td><code>atomic_write</code> removes the temporary file, and keeps the old one</td></tr>
+    <tr><td>Where is a model call retried?</td><td>A private helper inside <code>ai_client.py</code></td><td>The gateway, using <code>retry_transient</code> from <code>decorators.py</code></td></tr>
+    <tr><td>What is recorded about a model call?</td><td>Tokens and time, logged by the pipeline per case</td><td>A trace: prompt hash, prompt version, model settings, attempts, time, tokens. One <code>model_call</code> log line per call in a live run</td></tr>
+    <tr><td>Is the retry rule tested against anything?</td><td>Only against itself</td><td>Against a <code>tenacity</code> version too, with 10 checks</td></tr>
+    <tr><td>How do we know nothing changed?</td><td>We trusted the tests</td><td>Tests, the evaluation result, and three file fingerprints compared after every step</td></tr>
+    <tr><td>How many checks protect it?</td><td>83 passing tests, mypy on 37 files</td><td>114 passing tests, mypy on 45 files, ruff clean</td></tr>
+  </table></div>
+
+  <div class="panel" style="margin-top:22px">
+    <h3 style="margin-bottom:16px">How the class climbed, in order</h3>
+    <ol class="path">
+      <li><b>Take the before picture</b><span>83 checks passed, the evaluation result, and three file fingerprints saved by <code>scratch/prove.py</code>.</span></li>
+      <li><b>Functions are values, and closures</b><span>A function can be handed over, returned, and can remember variables from where it was made.</span></li>
+      <li><b>Decorators</b><span><code>count_calls</code> and <code>retry_transient</code>, with <code>functools.wraps</code>, a decorator that takes settings, and stacking order.</span></li>
+      <li><b>Context managers</b><span><code>fileio.py</code> with <code>atomic_write</code>, whose clean-up runs even when the block fails.</span></li>
+      <li><b>Refactor one behaviour at a time</b><span>Readers first, then writers. After each, the checks and fingerprints were compared.</span></li>
+      <li><b>Compare, then build the gateway</b><span><code>tenacity</code> was compared and not adopted. Then <code>ModelGateway</code> took over timing, retry, usage and a safe trace.</span></li>
+    </ol>
+  </div>
+  <div class="say" style="margin-top:22px"><b>The sentence to remember</b>Write each job once, change one behaviour at a time, and prove after every step that nothing else moved.</div>
+</section>
+
+<!-- ================= REPO ================= -->
+<section id="repo">
+  <div class="kicker">Reference</div>
+  <h2>The files that changed</h2>
+  <p class="intro">Click a file to see the lines that matter most for Class 6. These are the lines the lesson turns on, not the whole file. The complete files are in the Final directory from your instructor.</p>
+  <div class="fileviewer">
+    <div class="flist" id="flist" role="list" aria-label="Files in the repository"></div>
+    <div class="panel">
+      <p class="fname" id="fname"></p>
+      <p class="fnote" id="fnote"></p>
+      <div class="code"><pre id="fcode"></pre></div>
+    </div>
+  </div>
+  <div class="callout warn" style="margin-top:18px"><b>Not in Git</b><code>.venv/</code>, <code>.env</code>, <code>.streamlit/secrets.toml</code>, <code>scratch/</code>, <code>outputs/</code>, and the <code>.mypy_cache/</code> and <code>.pytest_cache/</code> folders stay out of the repository. That includes <code>scratch/prove.py</code> and its saved <code>before.txt</code>.</div>
+</section>
+
+<!-- ================= CONCEPTS ================= -->
+<section id="notebook">
+  <div class="kicker">Reference</div>
+  <h2>The concept notebook</h2>
+  <p class="intro">Pick a topic. Each one gives the idea in plain words, the code or output from class, and what to remember.</p>
+  <div class="explore">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Concepts"></div>
+    <div class="panel cp-panel" id="cpanel" role="tabpanel"></div>
+  </div>
+</section>
+
+<!-- ================= SETUP ORDER ================= -->
+<section id="setup">
+  <div class="kicker">Rebuild it</div>
+  <h2>One suggestion, step by step</h2>
+  <p class="intro">Each step depends on the one before it. Click the steps in the order the program runs them for one flagged case in a live run, first to last.</p>
+  <div class="panel order">
+    <div class="ans" id="ordAns" aria-live="polite"></div>
+    <p class="hint" id="ordHint"></p>
+    <div class="chiprow" id="ordPool"></div>
+    <div class="ctl" style="margin:12px 0 0"><button class="btn ghost" id="ordReset">Shuffle and start over</button></div>
+  </div>
+  <div class="say"><b>Why this order?</b>The prompt and its cache key come first, then the cache is checked, because a saved valid reply means no model call is needed. The gateway wraps the call so that the counter sits inside the retry, and the timer wraps both. The trace is recorded in a <code>finally</code> after the timer has closed, so the latency is already filled in. The reply is checked only after the call is done, a repair goes through the same gateway, and only a valid reply is saved, with a safe write.</div>
+</section>
+
+<!-- ================= SORT IT ================= -->
+<section id="games">
+  <div class="kicker">Sort it</div>
+  <h2>What should happen?</h2>
+  <p class="intro">Two quick sorting games. Click an item, then click the bin where it belongs.</p>
+  <h3>Retry, give up, repair or mark invalid?</h3>
+  <div class="sorter" id="sortWhen"></div>
+  <div class="say"><b>Match the response to the problem</b>Waiting fixes a busy service, not a missing key or a wrong value. A reply that cannot be read gets one repair. A reply with wrong values is never repaired, because asking again only invites a better-sounding invention.</div>
+  <h3 style="margin-top:26px">Decorator or context manager?</h3>
+  <div class="sorter" id="sortGit"></div>
+</section>
+
+<!-- ================= PRACTICE ================= -->
+<section id="practice">
+  <div class="kicker">Practice</div>
+  <h2>The take-home sheet</h2>
+  <p class="intro">Seven short tasks. Try each one in your own repository first, then open the answer to compare. <strong>Task 5 is the most useful</strong>: it makes you do one more refactor step, with the proof.</p>
+  <div id="tasks"></div>
+</section>
+
+<!-- ================= ERRORS ================= -->
+<section id="errors">
+  <div class="kicker">When it breaks</div>
+  <h2>Read the last line first</h2>
+  <p class="intro">Look for your message below. Type a word from it, such as <code>tenacity</code>, <code>DIFFERENT</code> or <code>logger</code>, to filter the list.</p>
+  <input class="filter" id="trFilter" placeholder="Filter, for example: tenacity, DIFFERENT, logger" aria-label="Filter the troubleshooting list">
+  <div class="scroll"><table id="trTable"><thead><tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr></thead><tbody></tbody></table></div>
+  <p class="muted" id="trNone" style="display:none;margin-top:10px">Nothing matches. Try a shorter word, or ask your instructor and include the last line of your error.</p>
+  <h3 style="margin:30px 0 10px">Questions beginners ask</h3>
+  <div id="faq"></div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section id="quiz">
+  <div class="kicker">Check yourself</div>
+  <h2>Six quick questions</h2>
+  <p class="intro">One right answer each. Pick an answer, and read the reason straight away.</p>
+  <div id="quizBox"></div>
+  <div class="score" id="score" aria-live="polite">Score: 0 of 6</div>
+</section>
+
+<!-- ================= CHEAT ================= -->
+<section id="cheat">
+  <div class="kicker">Keep this</div>
+  <h2>Cheat sheet</h2>
+  <p class="intro">You do not need to memorise any of it. You need to recognise it and know what question it answers.</p>
+  <h3 style="margin:22px 0 10px">What the gateway does with each outcome</h3>
+  <div class="scroll">
+  <table>
+    <tr><th>What happens</th><th>Example</th><th>Attempts</th><th>Result</th></tr>
+    <tr><td>Transient error, then success</td><td><code>LlmTimeout</code> twice</td><td>3</td><td>Reply returned. Trace outcome <code>OK</code></td></tr>
+    <tr><td>Transient error every time</td><td><code>LlmRateLimited</code> (429)</td><td>3</td><td>Original error raised. Status UNAVAILABLE, "rate limited after 3 attempts"</td></tr>
+    <tr><td>Permanent error</td><td><code>MissingApiKeyError</code></td><td>1</td><td>Raised at once. Trace outcome is the class name</td></tr>
+    <tr><td>A bug in the caller</td><td><code>KeyError</code></td><td>1</td><td>Recorded by class name, and raised again</td></tr>
+    <tr><td>Reply not JSON</td><td>Cut-off text</td><td>2 calls</td><td>One repair through the same gateway. Two <code>model_call</code> lines</td></tr>
+    <tr><td>Reply has a wrong value</td><td>A quote not in the note</td><td>1</td><td><code>INVALID_REPLY</code>. No retry, no repair. The <code>model_call</code> line still says OK, because the call worked</td></tr>
+  </table>
+  </div>
+  <h3 style="margin:22px 0 10px">Decorators and context managers</h3>
+  <div class="scroll">
+  <table>
+    <tr><th>You want</th><th>Remember</th></tr>
+    <tr><td>A decorator</td><td>A function that takes a function and returns a new one. <code>@name</code> above <code>def</code> means <code>f = name(f)</code></td></tr>
+    <tr><td>Keep the name and docstring</td><td><code>@functools.wraps(function)</code> above <code>def wrapper</code></td></tr>
+    <tr><td>A decorator with settings</td><td>Three layers: settings, then the function, then each call. Brackets are required: <code>@retry_transient(...)</code></td></tr>
+    <tr><td>Stacking order</td><td>The decorator nearest <code>def</code> wraps first. A counter inside a retry counts attempts. Outside, it counts calls</td></tr>
+    <tr><td>A context manager</td><td><code>__enter__</code> and <code>__exit__</code>, or <code>@contextmanager</code> with one <code>yield</code> and a <code>try</code>/<code>finally</code></td></tr>
+    <tr><td>A closure</td><td>A function plus the outside variables it uses. <code>nonlocal</code> lets it change one</td></tr>
+    <tr><td>Today's final numbers</td><td>114 tests, 45 mypy files, 27 lines of file handling before and 18 after</td></tr>
+  </table>
+  </div>
+  <h3 style="margin:22px 0 10px">Commands</h3>
+  <div class="scroll">
+  <table>
+    <tr><th>Task</th><th>Command</th></tr>
+    <tr><td>Take or compare the proof</td><td><code>python scratch/prove.py</code></td></tr>
+    <tr><td>Skip test files that cannot be imported yet</td><td><code>python scratch/prove.py --ignore=tests/test_gateway.py</code></td></tr>
+    <tr><td>Run all tests</td><td><code>python -m pytest -q</code></td></tr>
+    <tr><td>Type-check, lint</td><td><code>python -m mypy</code> &nbsp; <code>python -m ruff check .</code></td></tr>
+    <tr><td>Run the evaluation</td><td><code>python -m meridian_workbench.evaluation</code></td></tr>
+    <tr><td>Install the new library</td><td><code>python -m pip install -r requirements.txt</code></td></tr>
+  </table>
+  </div>
+  <div class="say"><b>The rule of the class</b>Run the checks. Change one behaviour. Run the checks again. Compare. If a change is on purpose, name it, test it and list it.</div>
+</section>
+
+<!-- ================= REFLECT ================= -->
+<section id="reflect">
+  <div class="kicker">Close the loop</div>
+  <h2>Is your repository ready?</h2>
+  <p class="intro">Tick each item only when it is true. If any item is not, fix it before the next class. Your ticks are saved in this browser only.</p>
+  <div class="row two">
+    <div>
+      <ul class="chk" id="finalChecks">
+        <li data-check="1"><span class="ck"></span><span class="tx"><code>pytest</code> reports <code>114 passed</code>, including the four new test files</span></li>
+        <li data-check="2"><span class="ck"></span><span class="tx"><code>mypy</code> says <code>Success: no issues found in 45 source files</code></span></li>
+        <li data-check="3"><span class="ck"></span><span class="tx"><code>ruff check .</code> says <code>All checks passed!</code></span></li>
+        <li data-check="4"><span class="ck"></span><span class="tx"><code>python scratch/prove.py</code> ends with <code>fingerprints: SAME as before</code></span></li>
+        <li data-check="5"><span class="ck"></span><span class="tx">The evaluation still prints <code>eval-6fb4ed4a</code> and 9 of 10, 7 of 7, 7 of 7, 9 of 10</span></li>
+        <li data-check="6"><span class="ck"></span><span class="tx">After a failed write, no <code>.tmp</code> file is left in the folder</span></li>
+        <li data-check="7"><span class="ck"></span><span class="tx">A live-style run adds <code>model_call</code> lines that hold no note text and no key</span></li>
+        <li data-check="8"><span class="ck"></span><span class="tx"><code>docs/change_note.md</code> is written, and the work is committed and pushed</span></li>
+        <li data-check="9"><span class="ck"></span><span class="tx">I can explain the difference between a decorator and a context manager in my own words</span></li>
+      </ul>
+    </div>
+    <div style="min-width:0">
+      <div class="panel">
+        <h3 style="margin:0 0 8px">Today's numbers</h3>
+        <p class="small muted" style="margin:0 0 10px">What the finished project reports. If yours differs, find out why before moving on.</p>
+        <div class="scroll"><table>
+          <tr><th>Check</th><th>Result</th></tr>
+          <tr><td>Tests passed</td><td>114 (83 before, plus 6, 7, 8 and 10)</td></tr>
+          <tr><td>mypy</td><td>no issues in 45 source files (37 before)</td></tr>
+          <tr><td>Fingerprints, in order</td><td>5e5608af0a58 (evaluation_report.json), c31809186d1b (attention_report.json), 2925b31c9343 (quarantine.csv)</td></tr>
+          <tr><td>Evaluation</td><td>eval-6fb4ed4a, prompt v2: 9 of 10, 7 of 7, 7 of 7, 9 of 10</td></tr>
+          <tr><td>Counts along the way</td><td>89 after decorators, 96 after <code>fileio.py</code>, 106 after the comparison, 114 after the gateway</td></tr>
+        </table></div>
+        <p class="small muted" style="margin:10px 0 0">The evaluation line is structural validity, category correct, grounded and abstention correct, in that order.</p>
+      </div>
+    </div>
+  </div>
+  <div class="say" style="margin-top:22px"><b>Exit ticket, in your own words</b>Why is the counter inside the retry when we want to count attempts? Why does <code>atomic_write</code> need a <code>finally</code>? Why did <code>tenacity</code> need <code>reraise=True</code> for our code? Why does the trace hold a hash and not the prompt? What would you tell the Operations lead about what changed, and what did not?</div>
+</section>
+
+<footer>
+  <h2>Next up: build on a system you can change with confidence</h2>
+  <p>You now have a pipeline that checks, logs, reports, and can be reorganised in small, proven steps. Keep your repository passing all its checks, because the next class builds on it. Your instructor will share what comes next.</p>
+</footer>
+</main>
+<script>
+(function () {
+  'use strict';
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function setText(el, t) { if (el) el.textContent = t; }
+
+  /* ---------- progress bar and chapter highlight ---------- */
+  try {
+    var fill = $('#progfill'), chapLinks = $$('#chips a');
+    var secs = chapLinks.map(function (a) { return $(a.getAttribute('href')); }).filter(Boolean);
+    window.addEventListener('scroll', function () {
+      var h = document.documentElement;
+      var max = (h.scrollHeight - h.clientHeight) || 1;
+      if (fill) fill.style.width = Math.min(100, Math.round(h.scrollTop / max * 100)) + '%';
+      var cur = -1;
+      secs.forEach(function (s, i) { if (s.getBoundingClientRect().top < 140) cur = i; });
+      chapLinks.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
+    }, { passive: true });
+  } catch (e) { /* ignore */ }
+
+  /* ---------- replay desk: what does the gateway do ---------- */
+  var SCEN = {
+  "flaky": {
+    "code": "gateway.call(prompt)   # the model times out twice, then answers",
+    "caught": "the gateway: retry_transient around the caller",
+    "when": "Every attempt, until one works or the limit of 3 is reached.",
+    "out": "attempt 1 failed (LlmTimeout); waiting 0.04s\nattempt 2 failed (LlmTimeout); waiting 0.68s\n\ntrace: attempts 3, outcome OK, tokens 210 in and 55 out",
+    "why": "A timeout is a busy service, so waiting can fix it. The waits grow and have a random part, so many callers do not all return at the same moment."
+  },
+  "nokey": {
+    "code": "gateway.call(prompt)   # no API key is set",
+    "caught": "the caller, which raises MissingApiKeyError at once",
+    "when": "On the first attempt. The key is not a transient problem.",
+    "out": "MissingApiKeyError  (attempts: 1)\n\nNo wait, no second try. The trace outcome is the class name only.",
+    "why": "Waiting never creates a key. Retrying would only delay the message that tells you what to fix."
+  },
+  "ratelimit": {
+    "code": "gateway.call(prompt)   # a 429 comes back every time",
+    "caught": "the gateway, which gives up after its limit",
+    "when": "After 3 calls and 2 waits.",
+    "out": "3 calls, 2 waits\nstatus UNAVAILABLE: rate limited after 3 attempts\n\nThe original LlmRateLimited error is raised again, not hidden.",
+    "why": "A bounded retry is a promise: it will not hammer a service that keeps saying no. The case is marked failed, and the run carries on."
+  },
+  "notjson": {
+    "code": "first reply: \"Sure! Here is the JSON you asked for: {...\"",
+    "caught": "interpret_reply, then ONE repair through the same gateway",
+    "when": "After the call worked. The call is fine; the text is the problem.",
+    "out": "model_call  purpose=suggest  OK\nmodel_call  purpose=repair   OK\n\nTwo log lines, two traces. There is never a third call.",
+    "why": "This is a formatting failure, the only kind we repair. Because the repair goes through the gateway, it is timed, retried and traced like any other call."
+  },
+  "badquote": {
+    "code": "note:  \"Customer asking about parcel\"\nreply: evidence_span \"parcel delayed\"",
+    "caught": "SuggestionContract, with the note passed in as context",
+    "when": "After the call, when the reply is checked.",
+    "out": "model_call  OK            (the call itself worked)\nsuggestion  INVALID_REPLY  (quote not in the note)\n\nNo retry. No repair.",
+    "why": "Two different questions: did the call work, and is the answer allowed? The trace answers the first. The contract answers the second. Asking again only invites a better-sounding invention."
+  },
+  "halfwrite": {
+    "code": "write_quarantine(...)   # the disk fails halfway through the file",
+    "caught": "atomic_write, in its finally block",
+    "when": "At the moment the block raises.",
+    "out": "Class 5 leaves: ['quarantine.csv', 'quarantine.csv.tmp']\nClass 6 leaves: ['quarantine.csv']\n\nThe old quarantine.csv is untouched in both.",
+    "why": "The old file was always safe. What changed is that the failed attempt cleans up after itself, so nobody finds a half-written file later."
+  }
+};
+  function showScen(k) {
+    var s = SCEN[k];
+    $$('#pgMistakes .chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === k ? 'true' : 'false'); });
+    setText($('#pgCode'), s.code);
+    setText($('#pgOut'), 'Caught by: ' + s.caught + '\nWhen: ' + s.when + '\n\n' + s.out + '\n\nWhy it matters: ' + s.why);
+    setText($('#pgTally'), 'Retry what waiting can fix. Raise the rest at once.');
+  }
+  $$('#pgMistakes .chip').forEach(function (c) { c.addEventListener('click', function () { showScen(c.dataset.k); }); });
+  showScen('flaky');
+
+  /* ---------- the files that changed ---------- */
+  var FILES = [
+  {
+    "n": "fileio.py",
+    "tag": "new",
+    "note": "Three helpers, each the only place its job is written. atomic_write writes to a temporary file, renames it over the real one only if the block succeeded, and always removes the temporary file.",
+    "code": "def read_json(path):\n    with open(path, encoding=\"utf-8\") as f:\n        return json.load(f)\n\n@contextmanager\ndef atomic_write(path, *, newline=None):\n    temp = path.with_name(path.name + \".tmp\")\n    try:\n        with open(temp, \"w\", newline=newline, encoding=\"utf-8\") as f:\n            yield f\n        os.replace(temp, path)   # only if the block ended without an error\n    finally:\n        temp.unlink(missing_ok=True)"
+  },
+  {
+    "n": "decorators.py",
+    "tag": "new",
+    "note": "count_calls is a callable object that counts. retry_transient takes settings, so it has three layers: settings, then the function, then each call. The retry rule itself stays in retry.py.",
+    "code": "def retry_transient(*, max_attempts, base, cap, rng=None, sleep=time.sleep):\n    def decorator(function):\n        @functools.wraps(function)\n        def wrapper(*args, **kwargs):\n            return call_with_retry(\n                lambda: function(*args, **kwargs),\n                max_attempts=max_attempts, base=base, cap=cap,\n                rng=generator, sleep=sleep)\n        return wrapper\n    return decorator"
+  },
+  {
+    "n": "gateway.py: call",
+    "tag": "new",
+    "note": "The counter sits inside the retry, so it counts attempts. The timer wraps both. The trace is recorded in a finally that runs after the with block closes; if it ran inside, the latency would always be 0.",
+    "code": "counted = count_calls(lambda: self.caller(prompt, settings))\nguarded = retry_transient(max_attempts=..., base=..., cap=...)(counted)\ntry:\n    with timed() as timing:\n        reply = guarded()\nexcept Exception as error:\n    outcome = type(error).__name__   # the class name, never the message\n    raise\nfinally:\n    self._record(prompt, purpose, counted.calls, outcome, reply, timing)"
+  },
+  {
+    "n": "gateway.py: CallTrace",
+    "tag": "new",
+    "note": "Everything needed to find a call again, and nothing that can hold note text. The prompt is kept as a short hash.",
+    "code": "@dataclass(frozen=True)\nclass CallTrace:\n    purpose: str          # \"suggest\" or \"repair\"\n    input_hash: str       # first 12 hex characters of SHA-256\n    prompt_version: str\n    model: str\n    max_tokens: int\n    timeout_seconds: float\n    attempts: int\n    latency_ms: int\n    outcome: str          # \"OK\" or the error class name\n    input_tokens: int | None\n    output_tokens: int | None"
+  },
+  {
+    "n": "retry_compare.py",
+    "tag": "new",
+    "note": "The same rule written with the tenacity library, only to compare. The pipeline does not import it. reraise=True keeps our own error instead of tenacity's RetryError.",
+    "code": "retry(\n    retry=retry_if_exception_type(RETRYABLE),\n    stop=stop_after_attempt(max_attempts),\n    wait=wait_random_exponential(multiplier=base, max=cap),\n    sleep=sleep,\n    reraise=True,\n)"
+  },
+  {
+    "n": "ai_client.py",
+    "tag": "changed",
+    "note": "The private _ask helper is gone. The module builds a gateway and calls it. get_suggestion takes an optional logger, so live runs write one model_call line per call.",
+    "code": "gateway = ModelGateway(settings, caller, logger=logger, sleep=sleep)\nreply = gateway.call(prompt)\n...\nfixed = gateway.call(build_repair_prompt(reply.text), purpose=\"repair\")\n...\ncache[key] = reply.text            # only valid replies are kept\nwrite_json_atomic(settings.cache_path, cache)"
+  },
+  {
+    "n": "batch.py",
+    "tag": "changed",
+    "note": "Every writer now uses atomic_write. write_json_atomic builds the JSON text first, so a value that cannot be written fails before any file is touched.",
+    "code": "def write_quarantine(path, rows):\n    with atomic_write(path, newline=\"\") as f:\n        writer = csv.DictWriter(f, fieldnames=FIELDS)\n        writer.writeheader()\n        writer.writerows(rows)"
+  },
+  {
+    "n": "pyproject.toml",
+    "tag": "changed",
+    "note": "Version 0.5.0. tenacity is pinned in the dev extra and in requirements.txt, and is not in app/requirements.txt, because the deployed screen never needs it.",
+    "code": "version = \"0.5.0\"\n\n[project.optional-dependencies]\ndev = [\n  ...\n  \"tenacity==9.2.1\",\n]"
+  }
+];
+  var flist = $('#flist');
+  FILES.forEach(function (f, i) {
+    var b = document.createElement('button');
+    b.setAttribute('aria-pressed', 'false');
+    b.textContent = f.n + '  (' + f.tag + ')';
+    b.addEventListener('click', function () { showFile(i); });
+    flist.appendChild(b);
+  });
+  function showFile(i) {
+    var f = FILES[i];
+    $$('#flist button').forEach(function (x, j) { x.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
+    setText($('#fname'), f.n);
+    setText($('#fnote'), f.note);
+    setText($('#fcode'), f.code);
+  }
+  showFile(0);
+
+  /* ---------- concept notebook ---------- */
+  var TOPICS = [
+  {
+    "t": "Functions are values",
+    "s": "hand them around",
+    "say": "In Python a function is an object, like a number. You can store it in a variable, pass it to another function, and return it from one. Writing the name with no brackets is the function itself. Writing brackets calls it.",
+    "code": "def shout(text):\n    return text.upper()\n\nfix = shout          # no brackets: the function itself\nprint(fix(\"hi\"))     # HI\nprint(max([\"b\", \"ccc\", \"aa\"], key=len))   # ccc",
+    "rem": "Name without brackets means \"the thing\". Name with brackets means \"do it now\"."
+  },
+  {
+    "t": "Closures and nonlocal",
+    "s": "a function that remembers",
+    "say": "A closure is a function plus the outside variables it uses. The inner function keeps them alive after the outer one has finished. To change such a variable, not just read it, say nonlocal.",
+    "code": "def make_counter():\n    count = 0\n    def bump():\n        nonlocal count      # without this: UnboundLocalError\n        count += 1\n        return count\n    return bump\n\nc = make_counter()\nprint(c(), c(), c())   # 1 2 3",
+    "rem": "Python looks inside first, then outward: local, enclosing, global, built-in. Reading uses that search. Assigning makes a new local unless you say nonlocal."
+  },
+  {
+    "t": "What a decorator is",
+    "s": "a function that wraps a function",
+    "say": "A decorator takes a function and returns a new one. The line @name above a def means: define the function, then replace it with name(function). The \"@\" is only a tidy way to write that reassignment.",
+    "code": "@announce\ndef add(a, b):\n    return a + b\n\n# means exactly:\ndef add(a, b):\n    return a + b\nadd = announce(add)",
+    "rem": "If you ever get 'NoneType' object is not callable, your wrapper forgot to return the inner function."
+  },
+  {
+    "t": "wraps, *args and **kwargs",
+    "s": "keep the name, take any call",
+    "say": "The wrapper must accept whatever the real function accepts, so it takes *args and **kwargs and passes them on. Add functools.wraps so the wrapper keeps the real name and docstring. Without it, every log and error says \"wrapper\".",
+    "code": "import functools\n\ndef announce(function):\n    @functools.wraps(function)\n    def wrapper(*args, **kwargs):\n        print(\"calling\", function.__name__)\n        return function(*args, **kwargs)\n    return wrapper",
+    "rem": "*args collects positional values, **kwargs collects named ones. Together they mean \"anything\"."
+  },
+  {
+    "t": "A decorator with settings",
+    "s": "three layers",
+    "say": "If a decorator needs settings, there is one more layer. The outer call takes the settings and returns the real decorator. That decorator takes the function and returns the wrapper. The brackets are required, even for no settings.",
+    "code": "@retry_transient(max_attempts=3, base=0.5, cap=8.0)\ndef fetch(): ...\n\n# settings -> decorator -> wrapper\n# Without brackets: TypeError\n#   retry_transient() takes 0 positional arguments but 1 was given",
+    "rem": "Three layers means three returns: wrapper from decorator, decorator from the settings call."
+  },
+  {
+    "t": "Stacking order",
+    "s": "the one nearest def goes first",
+    "say": "With two decorators, the one nearest def wraps first and the other wraps that. So a counter placed inside a retry counts every attempt, and a counter placed outside counts every call. The same function, three attempts: inside gives 3, outside gives 1.",
+    "code": "@count_calls\n@retry_transient(...)\ndef f(): ...      # counter outside: counts calls -> 1\n\n@retry_transient(...)\n@count_calls\ndef f(): ...      # counter inside:  counts attempts -> 3",
+    "rem": "In the gateway the counter is inside the retry because we want attempts."
+  },
+  {
+    "t": "Context managers",
+    "s": "with, and a clean exit",
+    "say": "A with block guarantees an exit step, even when the block fails. A class does it with __enter__ and __exit__. The shorter way is @contextmanager: code before yield is the entry, code after is the exit, and a try/finally makes the exit run on errors too.",
+    "code": "@contextmanager\ndef announce_block(name):\n    print(\"start\", name)\n    try:\n        yield\n    finally:\n        print(\"end\", name)    # prints even if the block raises",
+    "rem": "Without the try/finally, an error inside the block skips everything after the yield."
+  },
+  {
+    "t": "Atomic write",
+    "s": "all of it, or none of it",
+    "say": "Write to a temporary file beside the real one. Only if the whole block works, rename it over the real file. If it fails, delete the temporary file and leave the old one alone. A reader never sees half a file.",
+    "code": "with atomic_write(path, newline=\"\") as f:\n    writer = csv.writer(f)\n    writer.writerow([\"case_id\", \"reason\"])\n    raise OSError(\"disk full\")   # temp removed, old file kept\n\nClass 5: ['quarantine.csv', 'quarantine.csv.tmp']\nClass 6: ['quarantine.csv']",
+    "rem": "os.replace is the step that makes it atomic: the file is the old one or the new one, never a mix."
+  },
+  {
+    "t": "Transient or permanent?",
+    "s": "what waiting can fix",
+    "say": "A transient error goes away by itself: a timeout, a 429 rate limit, a 5xx server error. A permanent error does not: a missing key, bad data, a wrong value. We retry the first kind, a few times, with growing waits. We never retry the second kind.",
+    "code": "RETRYABLE = (LlmTimeout, LlmRateLimited, LlmServerError)\n\n# retried:     LlmTimeout, LlmRateLimited, LlmServerError\n# not retried: MissingApiKeyError, KeyError, INVALID_REPLY",
+    "rem": "Bounded matters: always a maximum number of attempts and a maximum wait."
+  },
+  {
+    "t": "tenacity or hand-built?",
+    "s": "compared, not adopted",
+    "say": "tenacity is a well-known retry library. We wrote the same rule with it, tested both against each other, and kept ours. The reasons are small but real: without reraise=True it raises its own RetryError, and with max_attempts=0 it quietly makes one attempt where ours raises ValueError.",
+    "code": "tenacity without reraise  -> RetryError\nmax_attempts=0:\n  hand-built -> ValueError\n  tenacity   -> one silent attempt\n\n# tenacity==9.2.1 is pinned in the dev extra and requirements.txt only",
+    "rem": "Comparing before choosing is the lesson. A library is fine; an unexamined one is the risk."
+  },
+  {
+    "t": "The gateway and the trace",
+    "s": "one door to the model",
+    "say": "Every model call goes through ModelGateway.call. It times the call, retries only transient errors, captures token usage, and records a CallTrace. In a live run it also writes one model_call log line per call, with the same ten fields and no note text.",
+    "code": "purpose         suggest\ninput_hash      10fffc5dc735\nprompt_version  v2\nmodel           claude-haiku-5-5\nattempts        3\noutcome         OK\ninput_tokens    210\noutput_tokens   55",
+    "rem": "latency_ms of 0 on every call means _record was placed inside the with timed() block."
+  },
+  {
+    "t": "The prompt hash",
+    "s": "find it, never keep it",
+    "say": "The trace keeps the first 12 hex characters of the prompt's SHA-256. The same prompt always gives the same hash, so you can find the call again, yet the hash cannot be turned back into the note.",
+    "code": "from meridian_workbench.gateway import prompt_hash\nprint(prompt_hash(\"abc\"))    # ba7816bf8f01",
+    "rem": "A hash identifies. It does not store."
+  },
+  {
+    "t": "Proving a refactor",
+    "s": "nothing else moved",
+    "say": "A refactor changes how the code is written, never what it does. Change one behaviour, then run the same checks: the test count, the evaluation result, and a fingerprint of each output file. If all three fingerprints match, the outputs are byte for byte the same.",
+    "code": "python scratch/prove.py\n...\n5e5608af0a58 outputs/evaluation_report.json\nc31809186d1b outputs/batches/B-866dbbe0ca3e/attention_report.json\n2925b31c9343 outputs/batches/B-866dbbe0ca3e/quarantine.csv\nfingerprints: SAME as before",
+    "rem": "run_report.json and summary.json are left out of the proof because they hold the attempt ID, which changes every run."
+  }
+];
+  var tabs = $('#tabs'), cpanel = $('#cpanel');
+  function showTopic(i) {
+    var T = TOPICS[i];
+    $$('#tabs .tab').forEach(function (b, j) {
+      b.setAttribute('aria-selected', j === i ? 'true' : 'false');
+    });
+    cpanel.innerHTML = '';
+    var h = document.createElement('h3'); h.textContent = T.t;
+    var say = document.createElement('div'); say.className = 'say'; say.innerHTML = '<b>In plain words</b>';
+    var sp = document.createElement('span'); sp.textContent = T.say; say.appendChild(sp);
+    var code = document.createElement('div'); code.className = 'code';
+    var pre = document.createElement('pre'); pre.textContent = T.code; code.appendChild(pre);
+    var rem = document.createElement('ul'); rem.className = 'rem';
+    var li = document.createElement('li'); li.textContent = T.rem; rem.appendChild(li);
+    cpanel.appendChild(h); cpanel.appendChild(say); cpanel.appendChild(code); cpanel.appendChild(rem);
+  }
+  TOPICS.forEach(function (T, i) {
+    var b = document.createElement('button');
+    b.className = 'tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', 'false');
+    b.innerHTML = esc(T.t) + '<small>' + esc(T.s) + '</small>';
+    b.addEventListener('click', function () { showTopic(i); });
+    tabs.appendChild(b);
+  });
+  showTopic(0);
+
+  /* ---------- order game: one suggestion, step by step ---------- */
+  var STEPS = [
+  "Build the prompt from the note and the prompt version, and make its cache key",
+  "Look in the cache. A saved valid reply ends the work here, with no model call",
+  "Hand the prompt to gateway.call (purpose \"suggest\")",
+  "Inside the gateway, the timer wraps the retry, and the counter sits inside the retry. Transient errors wait and try again",
+  "After the timer closes, record the trace in a finally and log one model_call line",
+  "Check the reply against the contract: shape, values, and the quote in the note",
+  "If the reply was not JSON, make one repair call through the same gateway (purpose \"repair\")",
+  "Save only a valid reply to the cache, with an atomic write"
+];
+  var ordOrder = [], ordTurn = 0;
+  var ordPool = $('#ordPool'), ordAns = $('#ordAns'), ordHint = $('#ordHint');
+  function ordShuffle() {
+    var idx = STEPS.map(function (_, i) { return i; });
+    for (var i = idx.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+    ordOrder = []; ordTurn = 0;
+    ordPool.innerHTML = ''; ordAns.innerHTML = ''; ordHint.className = 'hint'; ordHint.textContent = '';
+    idx.forEach(function (s) {
+      var c = document.createElement('button'); c.className = 'chip'; c.textContent = STEPS[s]; c.setAttribute('aria-pressed', 'false');
+      c.addEventListener('click', function () {
+        if (s === ordOrder.length) {
+          ordOrder.push(s); c.remove();
+          var row = document.createElement('div'); row.textContent = ordOrder.length + '. ' + STEPS[s]; ordAns.appendChild(row);
+          if (ordOrder.length === STEPS.length) { ordHint.className = 'hint good'; ordHint.textContent = 'In order. Check the cache before paying for a call, record after the timer closes, and save only what is valid.'; }
+          else { ordHint.className = 'hint'; ordHint.textContent = 'Correct. Now the next step.'; }
+        } else {
+          ordHint.className = 'hint bad';
+          ordHint.textContent = 'Not yet. Think about what must exist before this step can run.';
+          c.classList.add('sel'); setTimeout(function () { c.classList.remove('sel'); }, 500);
+        }
+      });
+      ordPool.appendChild(c);
+    });
+  }
+  $('#ordReset').addEventListener('click', ordShuffle);
+  ordShuffle();
+
+  /* ---------- sorters ---------- */
+  function sorter(el, bins, items, doneMsg) {
+    var sel = null, left = items.length, wrong = 0;
+    var pool = document.createElement('div'); pool.className = 'pool';
+    var hint = document.createElement('p'); hint.className = 'hint';
+    var grid = document.createElement('div'); grid.className = 'bins';
+    var chips = [];
+    items.forEach(function (it) {
+      var c = document.createElement('button'); c.className = 'chip'; c.textContent = it.t; c.setAttribute('aria-pressed', 'false');
+      c.addEventListener('click', function () {
+        chips.forEach(function (x) { x.classList.remove('sel'); x.setAttribute('aria-pressed', 'false'); });
+        sel = it; c.classList.add('sel'); c.setAttribute('aria-pressed', 'true');
+        hint.className = 'hint'; hint.textContent = 'Now click the bin for this item.';
+      });
+      it.chip = c; chips.push(c); pool.appendChild(c);
+    });
+    bins.forEach(function (b) {
+      var d = document.createElement('button'); d.className = 'bin';
+      d.innerHTML = '<b>' + esc(b.label) + '</b><span class="why">' + esc(b.sub || '') + '</span><span class="placed"></span>';
+      d.addEventListener('click', function () {
+        if (!sel) { hint.className = 'hint'; hint.textContent = 'Click an item first, then a bin.'; return; }
+        var it = sel;
+        if (it.bin === b.k) {
+          var s = document.createElement('span'); s.textContent = it.t; $('.placed', d).appendChild(s);
+          pool.removeChild(it.chip); sel = null; left--;
+          hint.className = 'hint good'; hint.textContent = 'Correct. ' + it.why;
+          if (!left) {
+            var e = document.createElement('span'); e.className = 'empty'; e.textContent = 'All sorted.'; pool.appendChild(e);
+            hint.textContent = (wrong === 0 ? 'Perfect, with no mistakes. ' : 'All sorted, with ' + wrong + ' wrong ' + (wrong === 1 ? 'try' : 'tries') + '. ') + (doneMsg || '');
+          }
+        } else {
+          wrong++; d.classList.add('flash'); setTimeout(function () { d.classList.remove('flash'); }, 500);
+          hint.className = 'hint bad'; hint.textContent = 'Not quite. ' + (it.hint || 'Think about when the value is known.');
+        }
+      });
+      grid.appendChild(d);
+    });
+    el.appendChild(pool); el.appendChild(hint); el.appendChild(grid);
+  }
+  sorter($('#sortWhen'), [
+  {
+    "k": "retry",
+    "label": "Retry",
+    "sub": "wait, then try again (max 3)"
+  },
+  {
+    "k": "raise",
+    "label": "Raise at once",
+    "sub": "waiting cannot help"
+  },
+  {
+    "k": "repair",
+    "label": "One repair",
+    "sub": "ask again for the same answer"
+  },
+  {
+    "k": "invalid",
+    "label": "INVALID_REPLY",
+    "sub": "stop; counted as failed"
+  }
+], [
+  {
+    "t": "the call times out",
+    "bin": "retry",
+    "why": "A timeout is a busy service. Waiting can fix it.",
+    "hint": "Will it go away by itself?"
+  },
+  {
+    "t": "the service answers 429 (rate limited)",
+    "bin": "retry",
+    "why": "The service asked us to slow down. A short, growing wait is the right response.",
+    "hint": "Is it a busy service?"
+  },
+  {
+    "t": "the server answers 500",
+    "bin": "retry",
+    "why": "A server error is often brief. It is retried, with a limit.",
+    "hint": "Is it the server's fault, for now?"
+  },
+  {
+    "t": "no API key is set",
+    "bin": "raise",
+    "why": "Waiting never creates a key. Raise at once, so the message reaches you quickly.",
+    "hint": "Can time fix it?"
+  },
+  {
+    "t": "a bug in our own code raises KeyError",
+    "bin": "raise",
+    "why": "A bug will happen again exactly the same. It is recorded by class name and raised.",
+    "hint": "Will the same call fail again?"
+  },
+  {
+    "t": "friendly text wrapped around the JSON",
+    "bin": "repair",
+    "why": "The call worked; the format did not. That is the only failure we repair, and only once.",
+    "hint": "Is it the format or the content?"
+  },
+  {
+    "t": "a quote that is not in the note",
+    "bin": "invalid",
+    "why": "A wrong value is never repaired. Asking again only invites a better-sounding invention.",
+    "hint": "Can the quote be found in the note?"
+  },
+  {
+    "t": "a repair reply that is still not JSON",
+    "bin": "invalid",
+    "why": "The one repair is used. There is never a third call.",
+    "hint": "Has the repair been used?"
+  }
+], "Retry what waiting can fix. Raise what it cannot. Repair a format once, and never repair a wrong value.");
+
+  sorter($('#sortGit'), [
+  {
+    "k": "dec",
+    "label": "Decorator",
+    "sub": "changes how a function behaves"
+  },
+  {
+    "k": "ctx",
+    "label": "Context manager",
+    "sub": "sets up and always cleans up"
+  }
+], [
+  {
+    "t": "count how many times a function was called",
+    "bin": "dec",
+    "why": "It wraps every call to the function and adds a counter. That is a decorator.",
+    "hint": "Does it wrap each call?"
+  },
+  {
+    "t": "retry a function when it times out",
+    "bin": "dec",
+    "why": "It wraps the call and decides what to do when it fails. A decorator.",
+    "hint": "Does it wrap the call?"
+  },
+  {
+    "t": "write a file, and remove the temp file if the write fails",
+    "bin": "ctx",
+    "why": "Set up, do the work, always clean up. That is a context manager.",
+    "hint": "Is there a clean-up that must always run?"
+  },
+  {
+    "t": "time a block of lines, then fill in the milliseconds",
+    "bin": "ctx",
+    "why": "A block, not a function. timed() is a context manager.",
+    "hint": "Is it a block, or a function?"
+  },
+  {
+    "t": "keep a function's name in the logs after wrapping it",
+    "bin": "dec",
+    "why": "That is what functools.wraps does inside a decorator.",
+    "hint": "Is it about wrapping a function?"
+  },
+  {
+    "t": "open a file and close it when the block ends",
+    "bin": "ctx",
+    "why": "The classic with block: open, use, always close.",
+    "hint": "Does something need closing?"
+  }
+], "A decorator wraps a function. A context manager wraps a block, and promises the clean-up.");
+
+  /* ---------- take-home sheet ---------- */
+  var TASKS = [
+  {
+    "t": "Predict the counter",
+    "tool": "closures",
+    "ans": "Predict what this prints, then run it. Answer: 1 2 3 | 1. Each make_counter() call makes its own count, so a second counter starts again at 1.",
+    "code": "def make_counter():\n    count = 0\n    def bump():\n        nonlocal count\n        count += 1\n        return count\n    return bump\n\na = make_counter()\nb = make_counter()\nprint(a(), a(), a(), \"|\", b())"
+  },
+  {
+    "t": "Write announce",
+    "tool": "decorators.py",
+    "ans": "Write a decorator announce that prints \"calling NAME\" before each call and keeps the real name. Then check add.__name__ is still \"add\".",
+    "code": "import functools\n\ndef announce(function):\n    @functools.wraps(function)\n    def wrapper(*args, **kwargs):\n        print(\"calling\", function.__name__)\n        return function(*args, **kwargs)\n    return wrapper\n\n@announce\ndef add(a, b):\n    return a + b\n\nprint(add(2, 3), add.__name__)   # calling add / 5 add"
+  },
+  {
+    "t": "Inside or outside?",
+    "tool": "stacking",
+    "ans": "A function fails with LlmTimeout twice, then works. With the counter inside the retry, calls is 3. With the counter outside, calls is 1. Try both orders with count_calls and retry_transient (use sleep=lambda s: None so you do not wait). Say which one the gateway needs, and why. Answer: inside, because it needs attempts."
+  },
+  {
+    "t": "Write announce_block",
+    "tool": "context managers",
+    "ans": "Write a context manager announce_block(name) that prints \"start NAME\" on entry and \"end NAME\" on exit, even if the block raises. Answer: use @contextmanager with try/finally around the yield. Test it by raising ValueError inside the block: the end line still prints.",
+    "code": "from contextlib import contextmanager\n\n@contextmanager\ndef announce_block(name):\n    print(\"start\", name)\n    try:\n        yield\n    finally:\n        print(\"end\", name)"
+  },
+  {
+    "t": "One more refactor, with proof",
+    "tool": "pipeline.py",
+    "ans": "pipeline.py still has two lines that read a JSON file by hand (about lines 204 and 265, each json.loads(...read_text(...))). Replace each with read_json, then run python scratch/prove.py. Expected: 114 passed, mypy clean, and \"fingerprints: SAME as before\". If it says DIFFERENT, undo the last change and look again.",
+    "code": "# before\ndata = json.loads(path.read_text(encoding=\"utf-8\"))\n\n# after\nfrom meridian_workbench.fileio import read_json\ndata = read_json(path)"
+  },
+  {
+    "t": "Hash a prompt",
+    "tool": "gateway.py",
+    "ans": "What does prompt_hash(\"abc\") return? Answer: ba7816bf8f01, the first 12 characters of the SHA-256 of \"abc\". Change one letter and the whole hash changes.",
+    "code": "from meridian_workbench.gateway import prompt_hash\nprint(prompt_hash(\"abc\"))"
+  },
+  {
+    "t": "Meet RetryError",
+    "tool": "retry_compare.py",
+    "ans": "Write the tenacity rule without reraise=True, make the function time out on every attempt, and catch what comes out. Answer: tenacity.RetryError, not LlmTimeout. That is why our version sets reraise=True: the rest of the program expects our own errors."
+  }
+];
+  var tasksBox = $('#tasks');
+  TASKS.forEach(function (T, i) {
+    var d = document.createElement('details'); d.className = 'task';
+    var s = document.createElement('summary');
+    s.innerHTML = '<span class="no">' + (i + 1) + '</span><span>' + esc(T.t) + '</span><span class="tool">' + esc(T.tool) + '</span>';
+    var a = document.createElement('div'); a.className = 'ans';
+    var p = document.createElement('p'); p.textContent = T.ans; a.appendChild(p);
+    if (T.code) { var c = document.createElement('div'); c.className = 'code'; var pre = document.createElement('pre'); pre.textContent = T.code; c.appendChild(pre); a.appendChild(c); }
+    d.appendChild(s); d.appendChild(a); tasksBox.appendChild(d);
+  });
+
+  /* ---------- troubleshooting ---------- */
+  var TROUBLE = [
+  [
+    "ModuleNotFoundError: No module named 'meridian_workbench.decorators'",
+    "The test is there, but the module is not written yet (the same for fileio and gateway)",
+    "Expected in the starter pack. It goes away when you create the module"
+  ],
+  [
+    "TypeError: get_suggestion() got an unexpected keyword argument 'logger'",
+    "pipeline.py passes logger= before get_suggestion accepts it",
+    "Add logger: RunLogger | None = None to get_suggestion, and pass it to the gateway"
+  ],
+  [
+    "mypy: Incompatible types in assignment (expression has type \"list[dict[str, str | None]]\", variable has type \"list[dict[str, str]]\")",
+    "read_csv_dicts can return None for a missing cell, and an old annotation says str",
+    "Change the annotation to list[dict[str, str | None]]. The data did not change; the honest type did"
+  ],
+  [
+    "UnboundLocalError: cannot access local variable 'count' where it is not associated with a value",
+    "The inner function assigns to count without nonlocal",
+    "Add nonlocal count at the top of the inner function"
+  ],
+  [
+    "TypeError: 'NoneType' object is not callable",
+    "The decorator forgot to return the wrapper",
+    "Add return wrapper at the end of the decorator"
+  ],
+  [
+    "retry_transient() takes 0 positional arguments but 1 was given",
+    "The brackets were left off: @retry_transient instead of @retry_transient(...)",
+    "Write @retry_transient(max_attempts=3, base=0.5, cap=8.0)"
+  ],
+  [
+    "RetryError",
+    "A tenacity retry without reraise=True",
+    "Add reraise=True so the original error comes out"
+  ],
+  [
+    "latency_ms is always 0 in the trace",
+    "_record was called inside the with timed() block, before the timer had filled in the value",
+    "Put the try/finally around the with block, so _record runs after it closes"
+  ],
+  [
+    "fingerprints: DIFFERENT from before",
+    "The last change altered an output, not just the code",
+    "Undo the last change, run python scratch/prove.py again, and make smaller steps. If a change is on purpose, name it and test it"
+  ],
+  [
+    "quarantine.csv.tmp is left in the folder after an error",
+    "The write does not use atomic_write",
+    "Use with atomic_write(path, newline=\"\") as f: and let it clean up"
+  ],
+  [
+    "pytest: 83 passed, but ImportError for test_gateway.py",
+    "The new test files are in place; the modules are not",
+    "Use python scratch/prove.py --ignore=tests/test_gateway.py until you have built it"
+  ],
+  [
+    "ModuleNotFoundError: No module named 'tenacity'",
+    "The new requirement is not installed in this environment",
+    "Activate the environment, then python -m pip install -r requirements.txt"
+  ]
+];
+  var trBody = $('#trTable tbody');
+  TROUBLE.forEach(function (r) {
+    var tr = document.createElement('tr');
+    r.forEach(function (cell, i) { var td = document.createElement('td'); if (i === 0) td.innerHTML = '<code>' + esc(cell) + '</code>'; else td.textContent = cell; tr.appendChild(td); });
+    trBody.appendChild(tr);
+  });
+  $('#trFilter').addEventListener('input', function () {
+    var q = this.value.trim().toLowerCase(), shown = 0;
+    $$('#trTable tbody tr').forEach(function (tr) {
+      var ok = !q || tr.textContent.toLowerCase().indexOf(q) > -1;
+      tr.style.display = ok ? '' : 'none'; if (ok) shown++;
+    });
+    $('#trNone').style.display = shown ? 'none' : '';
+  });
+
+  var FAQ = [
+  [
+    "Is a decorator just a function that returns a function?",
+    "Almost. It takes a function and returns a function that usually calls the original. The @ line is a tidy way to write f = decorator(f)."
+  ],
+  [
+    "Why not use tenacity?",
+    "We compared and kept our own. It is a good library; the point of the class was to know the rule well enough to test it. Switching later is a one-file change, and the test file shows how the two differ."
+  ],
+  [
+    "Why does the gateway store a hash, not the prompt?",
+    "The prompt contains the note, and a log is read by many people for a long time. A hash lets you find the same call again, and cannot be turned back into text."
+  ],
+  [
+    "Is retrying always safe?",
+    "Only when repeating the call is harmless and the error may go away. Here a model call can be repeated safely. Bad data and a missing key never improve with waiting, so they are not retried."
+  ],
+  [
+    "Why prove a refactor at all?",
+    "Because the tests only check what we thought to test. The fingerprints check what the program actually wrote. Together they say that nothing else moved."
+  ],
+  [
+    "Does the model_call log line mean the answer was good?",
+    "No. It means the call worked, and how long it took. Whether the answer is allowed is a separate check, made by the contract after the call."
+  ]
+];
+  var faq = $('#faq');
+  FAQ.forEach(function (f) {
+    var d = document.createElement('details'); d.className = 'task';
+    var s = document.createElement('summary'); s.innerHTML = '<span></span><span>' + esc(f[0]) + '</span>';
+    var a = document.createElement('div'); a.className = 'ans'; var p = document.createElement('p'); p.textContent = f[1]; a.appendChild(p);
+    d.appendChild(s); d.appendChild(a); faq.appendChild(d);
+  });
+
+  /* ---------- quiz ---------- */
+  var QUIZ = [
+  {
+    "q": "A function fails with LlmTimeout twice, then works. A counter sits INSIDE the retry. What does it show?",
+    "o": [
+      "1, because the function was called once",
+      "2, because only the failures count",
+      "3, because every attempt is counted",
+      "0, because the decorator hides the calls"
+    ],
+    "a": 2,
+    "e": "Inside the retry, the counter sees every attempt: two failures and one success. Outside it, it would see one call. The gateway wants attempts, so the counter goes inside."
+  },
+  {
+    "q": "Which of these is NOT retried by the gateway?",
+    "o": [
+      "LlmTimeout",
+      "LlmRateLimited",
+      "MissingApiKeyError",
+      "LlmServerError"
+    ],
+    "a": 2,
+    "e": "A missing key will still be missing after a wait. Timeouts, rate limits and server errors are transient, so waiting can fix them."
+  },
+  {
+    "q": "Why does atomic_write remove the temporary file in a finally block?",
+    "o": [
+      "So it also runs when the block raised an error",
+      "Because os.replace needs the file to be gone first",
+      "To make the write faster",
+      "Because Windows requires it"
+    ],
+    "a": 0,
+    "e": "A finally runs on success and on failure. On success the temp file has already been renamed, so there is nothing to remove. On failure it is cleaned up and the old file is kept."
+  },
+  {
+    "q": "The trace shows latency_ms 0 for every call. What is the most likely cause?",
+    "o": [
+      "The model is very fast",
+      "_record runs inside the with timed() block",
+      "The prompt hash is wrong",
+      "The retry limit is too low"
+    ],
+    "a": 1,
+    "e": "timed() fills in latency_ms only when its with block ends. Recording inside the block reads the value too early. Put the try/finally around the with block."
+  },
+  {
+    "q": "The reply is valid JSON, but its quote is not in the note. What does the gateway do?",
+    "o": [
+      "Retries up to 3 times",
+      "Makes one repair call",
+      "Nothing: the call worked, and the contract marks it INVALID_REPLY",
+      "Raises MissingApiKeyError"
+    ],
+    "a": 2,
+    "e": "The call itself succeeded, so the model_call line says OK. The contract then refuses the value. A wrong value is never retried or repaired."
+  },
+  {
+    "q": "What makes a refactor \"proven\" in this class?",
+    "o": [
+      "The code looks tidier",
+      "The same test count, the same evaluation result and the same three file fingerprints",
+      "A teammate approved it",
+      "The line count went down"
+    ],
+    "a": 1,
+    "e": "Tests check what we thought of. Fingerprints check what was written. When both match after every step, nothing else moved."
+  }
+];
+  var quizBox = $('#quizBox'), scoreEl = $('#score'), answered = 0, right = 0;
+  QUIZ.forEach(function (it, qi) {
+    var q = document.createElement('div'); q.className = 'q';
+    var qh = document.createElement('div'); qh.className = 'qh'; qh.innerHTML = '<span>Question ' + (qi + 1) + ' of ' + QUIZ.length + '</span>';
+    var qt = document.createElement('p'); qt.className = 'qt'; qt.textContent = it.q;
+    var opts = document.createElement('div'); opts.className = 'opts';
+    var fb = document.createElement('div'); fb.className = 'fb'; fb.style.display = 'none';
+    var btns = [];
+    it.o.forEach(function (txt, oi) {
+      var b = document.createElement('button'); b.className = 'opt'; b.setAttribute('type', 'button');
+      var sp = document.createElement('span'); sp.textContent = txt; b.appendChild(sp); btns.push(b);
+      b.addEventListener('click', function () {
+        if (btns.some(function (x) { return x.disabled; })) return;
+        btns.forEach(function (x) { x.disabled = true; });
+        answered++;
+        fb.style.display = '';
+        if (oi === it.a) { b.classList.add('right'); right++; fb.className = 'fb good'; fb.textContent = 'Correct. ' + it.e; }
+        else { b.classList.add('wrong'); btns[it.a].classList.add('right'); fb.className = 'fb bad'; fb.textContent = 'Not quite. ' + it.e; }
+        setText(scoreEl, 'Score: ' + right + ' of ' + QUIZ.length + (answered === QUIZ.length ? (right === QUIZ.length ? '. Great work.' : '. Re-read the sections for any you missed, then reload the page to try again.') : ''));
+      });
+      opts.appendChild(b);
+    });
+    q.appendChild(qh); q.appendChild(qt); q.appendChild(opts); q.appendChild(fb); quizBox.appendChild(q);
+  });
+
+  /* ---------- reflect checklist (saved in this browser only) ---------- */
+  var checks = {};
+  try { checks = JSON.parse(localStorage.getItem('c6postread') || '{}') || {}; } catch (e) { checks = {}; }
+  $$('#finalChecks li').forEach(function (li) {
+    var ck = $('.ck', li);
+    function paint(on) { li.classList.toggle('done', on); ck.textContent = on ? '✓' : ''; }
+    paint(!!checks[li.dataset.check]);
+    li.addEventListener('click', function () {
+      checks[li.dataset.check] = !checks[li.dataset.check];
+      paint(!!checks[li.dataset.check]);
+      try { localStorage.setItem('c6postread', JSON.stringify(checks)); } catch (e) { /* ignore */ }
+    });
+  });
+})();
+
+</script>
+</body>
+</html>
